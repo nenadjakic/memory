@@ -5,5 +5,4 @@ public enum GameSignal {
     NEW_GAME,
     STATISTICS,
     QUIT
-
 }

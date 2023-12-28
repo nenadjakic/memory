@@ -1,5 +1,8 @@
 package com.github.nenadjakic.memory;
 
+import lombok.Getter;
+
+@Getter
 public enum Pairs {
     FOUR(4),
     EIGHT(8),
@@ -8,9 +11,6 @@ public enum Pairs {
 
     private final int numberOfPairs;
 
-    int getNumberOfPairs() {
-        return numberOfPairs;
-    }
     Pairs(int numberOfPairs) {
         this.numberOfPairs = numberOfPairs;
     }

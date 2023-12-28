@@ -10,9 +10,6 @@ import org.springframework.shell.component.view.TerminalUI;
 import org.springframework.shell.component.view.TerminalUIBuilder;
 import org.springframework.shell.component.view.control.*;
 import org.springframework.shell.component.view.event.EventLoop;
-import org.springframework.shell.component.view.event.KeyEvent;
-import org.springframework.shell.geom.HorizontalAlign;
-import org.springframework.shell.geom.VerticalAlign;
 
 import java.util.Arrays;
 
@@ -23,73 +20,57 @@ public class MemoryGame {
     private final TerminalUIBuilder terminalUIBuilder;
     private final GameEngine gameEngine;
 
-    private TerminalUI ui;
+    private final TerminalUI ui;
     private GridView mainView;
+    private MenuComponent menuComponent;
     private AppView app;
-    private EventLoop eventLoop;
+    private final EventLoop eventLoop;
 
     public MemoryGame(TerminalUIBuilder terminalUIBuilder) {
         this.terminalUIBuilder = terminalUIBuilder;
         this.ui = this.terminalUIBuilder.build();
+        this.eventLoop = ui.getEventLoop();
         this.gameEngine = new GameEngine(ui).configure(GameSignal.ABOUT.name());
+
+        init();
     }
 
-    public void run() {
-        ui = terminalUIBuilder.build();
-        eventLoop = ui.getEventLoop();
-        app = buildView();
-        eventLoop.onDestroy(eventLoop.signalEvents().doOnNext(m -> {
-            if (GameSignal.QUIT.name().equals(m))
-            {
-                requestQuit();
-            } else if (GameSignal.ABOUT.name().equals(m)) {
-                gameEngine.configure(m);
-                ui.configure(gameEngine.getView());
-                mainView.addItem(gameEngine.getView(), 0,0,1,1,0,0);
-                ui.redraw();
-            }
-        }).subscribe());
-        eventLoop.systemEvents().doOnNext(m -> {
-
-        });
-        eventLoop.onDestroy(eventLoop.keyEvents()
-                .doOnNext(m -> {
-                    if (m.getPlainKey() == KeyEvent.Key.Q) {
-                        requestQuit();
-                    }
-                    if (m.getPlainKey() == KeyEvent.Key.q && m.hasCtrl()) {
-                        //requestQuit();
-                    }
-
-
-                    if (m.getPlainKey() == KeyEvent.Key.w && m.hasCtrl())
-                    {
-                        ui.setModal(null);
-                    }
-                })
-                .subscribe());
-
-        ui.setRoot(app, true);
-        ui.run();
-    }
-
-    public AppView buildView() {
+    private void init() {
         mainView = new GridView();
         mainView.setBorderPadding(2,0,0,0);
         mainView.setColumnSize(0);
         mainView.setRowSize(0);
         ui.configure(mainView);
 
-        mainView.addItem(gameEngine.getView(), 0,0,1,1,0,0);
-
-        var menuComponent = new MenuComponent(TITLE, Arrays.asList(
+        menuComponent = (MenuComponent) new MenuComponent(TITLE, Arrays.asList(
                 new MenuItem("About", 'a', true, GameSignal.ABOUT),
                 new MenuItem("Play", 'p', false, GameSignal.NEW_GAME),
                 new MenuItem("Statistics", 's', false, GameSignal.STATISTICS),
                 new MenuItem("Quit", 'q', false, GameSignal.QUIT))
-        );
-        var menuView = menuComponent.configure(ui).build();
+        ).configure(ui);
+    }
 
+    public void run() {
+        app = buildView();
+        eventLoop.onDestroy(eventLoop.signalEvents().doOnNext(m -> {
+            if (GameSignal.QUIT.name().equals(m))
+            {
+                requestQuit();
+            } else if (Arrays.asList(GameSignal.ABOUT.name(), GameSignal.STATISTICS.name(), GameSignal.NEW_GAME.name()).contains(m)) {
+                gameEngine.configure(m);
+                mainView.clearItems();
+                mainView.addItem(gameEngine.getView(), 0,0,1,1,0,0);
+                ui.redraw();
+            }
+        }).subscribe());
+
+        ui.setRoot(app, true);
+        ui.run();
+    }
+
+    public AppView buildView() {
+        mainView.addItem(gameEngine.getView(), 0,0,1,1,0,0);
+        var menuView = menuComponent.build();
         app = new AppView(mainView, menuView, new BoxView());
         ui.configure(app);
 
