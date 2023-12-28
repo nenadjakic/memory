@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MenuComponent extends AbstractGameComponent {
-
     private static final Logger log = LoggerFactory.getLogger(MenuComponent.class);
 
     private final String title;
@@ -77,9 +76,6 @@ public class MenuComponent extends AbstractGameComponent {
         });
 
         getEventloop().onDestroy(getEventloop().keyEvents().subscribe(event -> {
-            log.debug("MENU: " + event.getPlainKey());
-            log.debug("MENU CTRL: " + event.hasCtrl());
-            log.debug("s CTRL: " + (int)menuItemList.get(0).getShortcut());
             if (event.hasCtrl()) {
                 var optMenuItem = menuItemList.stream().filter(x -> x.getShortcut() == event.getPlainKey()).findAny();
 
@@ -92,14 +88,6 @@ public class MenuComponent extends AbstractGameComponent {
                 }
             }
         }));
-
-        if (!menuItemList.isEmpty()) {
-             var focusedMenuItem = menuItemList.stream().filter(MenuItem::isFocused).findAny().orElseGet(null);
-             if (focusedMenuItem == null) {
-                 focusedMenuItem = menuItemList.stream().findFirst().get();
-                 focusedMenuItem.setFocused(true);
-             }
-        }
 
         return view;
     }
