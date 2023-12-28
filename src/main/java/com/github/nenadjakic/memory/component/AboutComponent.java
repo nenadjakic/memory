@@ -51,7 +51,7 @@ public class AboutComponent extends AbstractGameComponent {
             screen.writerBuilder()
                     .color(Constant.FONT_COLOR)
                     .build()
-                    .text("To choose option use CTRL key press plus char in brackets in front of option. Example: CTRL + Q for quit.", r, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+                    .text("To choose menu option use CTRL plus char in brackets in front of menu option. Example: CTRL + Q for quit.", r, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 
             startY += 1;
             r = new Rectangle(10, startY, rect.width() - 10, 1);
@@ -59,6 +59,14 @@ public class AboutComponent extends AbstractGameComponent {
                     .color(Constant.FONT_COLOR)
                     .build()
                     .text("To start playing game press CTRL + P.", r, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+
+            startY += 1;
+            r = new Rectangle(10, startY, rect.width() - 10, 1);
+            screen.writerBuilder()
+                    .color(Constant.FONT_COLOR)
+                    .build()
+                    .text("In a game, to flip card type number of wanted card and press ENTER.", r, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+
             return rect;
         });
 
