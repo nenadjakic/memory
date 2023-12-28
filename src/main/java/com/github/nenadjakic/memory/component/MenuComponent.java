@@ -20,14 +20,15 @@ public class MenuComponent extends AbstractGameComponent {
 
     private static final Logger log = LoggerFactory.getLogger(MenuComponent.class);
 
-    private final String title = "MEMORY GAME";
+    private final String title;
     private final List<MenuItem> menuItemList;
 
     @Getter
     @Setter
     private boolean focused = false;
 
-    public MenuComponent(List<MenuItem> menuItemList) {
+    public MenuComponent(String title, List<MenuItem> menuItemList) {
+        this.title = title;
         this.menuItemList = menuItemList;
     }
 
@@ -76,15 +77,20 @@ public class MenuComponent extends AbstractGameComponent {
         });
 
         getEventloop().onDestroy(getEventloop().keyEvents().subscribe(event -> {
-            var optMenuItem = menuItemList.stream().filter(x -> x.getShortcut() == event.key()).findAny();
-            if (optMenuItem.isPresent()) {
-                menuItemList.forEach(x -> x.setFocused(false));
-                var menuItem = optMenuItem.get();
-                menuItem.setFocused(true);
+            log.debug("MENU: " + event.getPlainKey());
+            log.debug("MENU CTRL: " + event.hasCtrl());
+            log.debug("s CTRL: " + (int)menuItemList.get(0).getShortcut());
+            if (event.hasCtrl()) {
+                var optMenuItem = menuItemList.stream().filter(x -> x.getShortcut() == event.getPlainKey()).findAny();
 
-                getEventloop().dispatch(ShellMessageBuilder.ofSignal(menuItem.getGameSignal().name()));
+                if (optMenuItem.isPresent()) {
+                    menuItemList.forEach(x -> x.setFocused(false));
+                    var menuItem = optMenuItem.get();
+                    menuItem.setFocused(true);
+
+                    getEventloop().dispatch(ShellMessageBuilder.ofSignal(menuItem.getGameSignal().name()));
+                }
             }
-
         }));
 
         if (!menuItemList.isEmpty()) {

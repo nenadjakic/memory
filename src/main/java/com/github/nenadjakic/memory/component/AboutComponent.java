@@ -1,9 +1,12 @@
 package com.github.nenadjakic.memory.component;
 
+import com.github.nenadjakic.memory.util.Constant;
 import org.springframework.shell.component.view.control.BoxView;
 import org.springframework.shell.component.view.control.View;
 import org.springframework.shell.component.view.screen.Color;
-import org.springframework.shell.style.StyleSettings;
+import org.springframework.shell.geom.HorizontalAlign;
+import org.springframework.shell.geom.Rectangle;
+import org.springframework.shell.geom.VerticalAlign;
 
 public class AboutComponent extends AbstractGameComponent {
     @Override
@@ -14,13 +17,48 @@ public class AboutComponent extends AbstractGameComponent {
 
 
         view.setDrawFunction((screen, rect) -> {
-            //Rectangle r = new Rectangle(0, rect.y(), title.length(), 1);
-            screen.writerBuilder().color(Color.AQUAMARINE)
-                    .build().text("Memory match game", 10, 10);
+            int startY = 10;
+            Rectangle r = new Rectangle(10, startY, rect.width() - 10, 1);
+            screen.writerBuilder()
+                    .color(Constant.FOCUSED_FONT_COLOR)
+                    .style(1)
+                    .build()
+                    .text("Memory match game", r, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 
-            screen.writerBuilder().color(Color.AQUAMARINE)
-                    .build().text("MIT Licence", 10, 12);
+            startY += 2;
+            r = new Rectangle(10, startY, rect.width() - 10, 1);
+            screen.writerBuilder()
+                    .color(Constant.FONT_COLOR)
+                    .build()
+                    .text("Author: Nenad Jakic", r, HorizontalAlign.CENTER, VerticalAlign.CENTER);
 
+            startY += 1;
+            r = new Rectangle(10, startY, rect.width() - 10, 1);
+            screen.writerBuilder()
+                    .color(Constant.FONT_COLOR)
+                    .build()
+                    .text("Licence: MIT", r, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+
+            startY += 4;
+            r = new Rectangle(10, startY, rect.width() - 10, 1);
+            screen.writerBuilder()
+                    .color(Constant.FONT_COLOR)
+                    .build()
+                    .text("How to play", r, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+
+            startY += 2;
+            r = new Rectangle(10, startY, rect.width() - 10, 1);
+            screen.writerBuilder()
+                    .color(Constant.FONT_COLOR)
+                    .build()
+                    .text("To choose option use CTRL key press plus char in brackets in front of option. Example: CTRL + Q for quit.", r, HorizontalAlign.CENTER, VerticalAlign.CENTER);
+
+            startY += 1;
+            r = new Rectangle(10, startY, rect.width() - 10, 1);
+            screen.writerBuilder()
+                    .color(Constant.FONT_COLOR)
+                    .build()
+                    .text("To start playing game press CTRL + P.", r, HorizontalAlign.CENTER, VerticalAlign.CENTER);
             return rect;
         });
 

@@ -16,6 +16,8 @@ import org.springframework.shell.geom.VerticalAlign;
 
 import java.util.Arrays;
 
+import static com.github.nenadjakic.memory.util.Constant.TITLE;
+
 public class MemoryGame {
     private static final Logger log = LoggerFactory.getLogger(MemoryGame.class);
     private final TerminalUIBuilder terminalUIBuilder;
@@ -80,11 +82,11 @@ public class MemoryGame {
 
         mainView.addItem(gameEngine.getView(), 0,0,1,1,0,0);
 
-        var menuComponent = new MenuComponent(Arrays.asList(
-                new MenuItem("About", '1', true, GameSignal.ABOUT),
-                new MenuItem("Play", '2', false, GameSignal.NEW_GAME),
-                new MenuItem("Statistics", '3', false, GameSignal.STATISTICS),
-                new MenuItem("Quit", '4', false, GameSignal.QUIT))
+        var menuComponent = new MenuComponent(TITLE, Arrays.asList(
+                new MenuItem("About", 'a', true, GameSignal.ABOUT),
+                new MenuItem("Play", 'p', false, GameSignal.NEW_GAME),
+                new MenuItem("Statistics", 's', false, GameSignal.STATISTICS),
+                new MenuItem("Quit", 'q', false, GameSignal.QUIT))
         );
         var menuView = menuComponent.configure(ui).build();
 
