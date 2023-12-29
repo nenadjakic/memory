@@ -3,7 +3,6 @@ package com.github.nenadjakic.memory.component;
 import com.github.nenadjakic.memory.Pairs;
 import com.github.nenadjakic.memory.model.Card;
 import com.github.nenadjakic.memory.model.CardState;
-import com.github.nenadjakic.memory.util.Constant;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import lombok.Getter;
@@ -16,9 +15,7 @@ import org.springframework.shell.component.view.screen.Color;
 import org.springframework.shell.geom.HorizontalAlign;
 import org.springframework.shell.geom.Rectangle;
 import org.springframework.shell.geom.VerticalAlign;
-import org.springframework.shell.style.StyleSettings;
 
-import java.awt.*;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -45,11 +42,27 @@ public class BoardComponent extends AbstractGameComponent {
         return resolvedPairs == pairs.getNumberOfPairs();
     }
 
-    private Card card1;
-    private Card card2;
-    private Integer firstUserNumber;
-    private Integer secondUserNumber;
-    private String tempNumber = "";
+    private final Game game = new Game();
+
+    private class Game {
+        private Card card1;
+        private Card card2;
+        private Integer firstUserNumber;
+        private Integer secondUserNumber;
+        private String tempNumber = "";
+
+        private void clear() {
+            unresolvedPairs = pairs.getNumberOfPairs();
+            resolvedPairs = 0;
+            gameMap.clear();
+            shortcutCardMap.clear();
+            card1 = null;
+            card2 = null;
+            firstUserNumber = null;
+            secondUserNumber = null;
+            tempNumber = "";
+        }
+    }
 
     public BoardComponent(Pairs pairs) {
         this.pairs = pairs;
@@ -64,7 +77,7 @@ public class BoardComponent extends AbstractGameComponent {
         pairKeys.addAll(pairKeysSupplier.get().toList());
         Collections.shuffle(pairKeys);
 
-        clear();
+        game.clear();
 
         var numbers = IntStream.rangeClosed(1, 32).boxed().collect(Collectors.toCollection(LinkedList::new));
         for (int r = 0; r < rows; r++) {
@@ -103,19 +116,6 @@ public class BoardComponent extends AbstractGameComponent {
                 .contains(key);
     }
 
-    private void clear() {
-        unresolvedPairs = pairs.getNumberOfPairs();
-        resolvedPairs = 0;
-        gameMap.clear();
-        shortcutCardMap.clear();
-        card1 = null;
-        card2 = null;
-        firstUserNumber = null;
-        secondUserNumber = null;
-        tempNumber = "";
-    }
-
-
     @Override
     public View build() {
         var view = new GridView();
@@ -132,40 +132,40 @@ public class BoardComponent extends AbstractGameComponent {
         getEventloop().onDestroy(getEventloop().keyEvents().subscribe(keyEvent -> {
             // save result to temp variables
             if (KeyEvent.Key.Enter == keyEvent.key()) {
-                if (!tempNumber.isEmpty()) {
-                    if (firstUserNumber == null && secondUserNumber == null) {
-                        firstUserNumber = Integer.valueOf(tempNumber);
+                if (!game.tempNumber.isEmpty()) {
+                    if (game.firstUserNumber == null && game.secondUserNumber == null) {
+                        game.firstUserNumber = Integer.valueOf(game.tempNumber);
                         // if number is not valid, reset temp variable
-                        var card = shortcutCardMap.get(firstUserNumber);
+                        var card = shortcutCardMap.get(game.firstUserNumber);
                         if (card != null) {
                             if  (card.getState() == CardState.RESOLVED) {
-                                firstUserNumber = null;
+                                game.firstUserNumber = null;
                             } else {
                                 card.setState(CardState.OPENED);
                             }
                         } else {
-                            firstUserNumber = null;
+                            game.firstUserNumber = null;
                         }
-                        tempNumber = "";
-                    } else if (firstUserNumber != null && secondUserNumber == null) {
-                        secondUserNumber = Integer.valueOf(tempNumber);
-                        card1 = shortcutCardMap.get(firstUserNumber);
-                        card2 = shortcutCardMap.get(secondUserNumber);
+                        game.tempNumber = "";
+                    } else if (game.firstUserNumber != null && game.secondUserNumber == null) {
+                        game.secondUserNumber = Integer.valueOf(game.tempNumber);
+                        game.card1 = shortcutCardMap.get(game.firstUserNumber);
+                        game.card2 = shortcutCardMap.get(game.secondUserNumber);
                         // if number is not valid, reset temp variable
-                        // card1 is allready checked in previuos if block
-                        if (card2 != null) {
-                            if (card2.getState() == CardState.RESOLVED) {
-                                secondUserNumber = null;
+                        // card1 is already checked in previous if block
+                        if (game.card2 != null) {
+                            if (game.card2.getState() == CardState.RESOLVED) {
+                                game.secondUserNumber = null;
                             } else {
-                                card2.setState(CardState.OPENED);
+                                game.card2.setState(CardState.OPENED);
                             }
                         } else {
-                            secondUserNumber = null;
+                            game.secondUserNumber = null;
                         }
 
-                        if (card1.getSymbol() == card2.getSymbol()) {
-                            card1.setState(CardState.RESOLVED);
-                            card2.setState(CardState.RESOLVED);
+                        if (game.card1.getSymbol() == game.card2.getSymbol()) {
+                            game.card1.setState(CardState.RESOLVED);
+                            game.card2.setState(CardState.RESOLVED);
                             resolvedPairs++;
                             unresolvedPairs--;
 
@@ -187,25 +187,25 @@ public class BoardComponent extends AbstractGameComponent {
                                 }));
                             }
                         }
-                        tempNumber = "";
+                        game.tempNumber = "";
                     }
-                } else if (firstUserNumber != null && secondUserNumber != null) {
-                    firstUserNumber = null;
-                    secondUserNumber = null;
+                } else if (game.firstUserNumber != null && game.secondUserNumber != null) {
+                    game.firstUserNumber = null;
+                    game.secondUserNumber = null;
 
-                    if (CardState.RESOLVED != card1.getState()) {
-                        card1.setState(CardState.CLOSED);
+                    if (CardState.RESOLVED != game.card1.getState()) {
+                        game.card1.setState(CardState.CLOSED);
                     }
-                    if (CardState.RESOLVED != card2.getState()) {
-                        card2.setState(CardState.CLOSED);
+                    if (CardState.RESOLVED != game.card2.getState()) {
+                        game.card2.setState(CardState.CLOSED);
                     }
                 }
             }
-            if (firstUserNumber != null && secondUserNumber != null) {
+            if (game.firstUserNumber != null && game.secondUserNumber != null) {
                 return;
             }
             if (isNumber(keyEvent.key())) {
-                tempNumber += (char)keyEvent.key();
+                game.tempNumber += (char)keyEvent.key();
             }
         }));
 
