@@ -18,7 +18,7 @@ import static com.github.nenadjakic.memory.util.Constant.TITLE;
 public class MemoryGame {
     private static final Logger log = LoggerFactory.getLogger(MemoryGame.class);
     private final TerminalUIBuilder terminalUIBuilder;
-    private final GameEngine gameEngine;
+    private final GameViewSelector gameViewSelector;
 
     private final TerminalUI ui;
     private GridView mainView;
@@ -30,7 +30,7 @@ public class MemoryGame {
         this.terminalUIBuilder = terminalUIBuilder;
         this.ui = this.terminalUIBuilder.build();
         this.eventLoop = ui.getEventLoop();
-        this.gameEngine = new GameEngine(ui).configure(GameSignal.ABOUT.name());
+        this.gameViewSelector = new GameViewSelector(ui).configure(GameSignal.ABOUT.name());
 
         init();
     }
@@ -57,9 +57,9 @@ public class MemoryGame {
             {
                 requestQuit();
             } else if (Arrays.asList(GameSignal.ABOUT.name(), GameSignal.STATISTICS.name(), GameSignal.NEW_GAME.name()).contains(m)) {
-                gameEngine.configure(m);
+                gameViewSelector.configure(m);
                 mainView.clearItems();
-                mainView.addItem(gameEngine.getView(), 0,0,1,1,0,0);
+                mainView.addItem(gameViewSelector.getView(), 0,0,1,1,0,0);
                 ui.redraw();
             }
         }).subscribe());
@@ -69,7 +69,7 @@ public class MemoryGame {
     }
 
     public AppView buildView() {
-        mainView.addItem(gameEngine.getView(), 0,0,1,1,0,0);
+        mainView.addItem(gameViewSelector.getView(), 0,0,1,1,0,0);
         var menuView = menuComponent.build();
         app = new AppView(mainView, menuView, new BoxView());
         ui.configure(app);

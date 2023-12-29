@@ -13,8 +13,8 @@ import org.springframework.shell.component.view.control.View;
 
 @Setter
 @Getter
-public class GameEngine {
-    private static final Logger log = LoggerFactory.getLogger(GameEngine.class);
+public class GameViewSelector {
+    private static final Logger log = LoggerFactory.getLogger(GameViewSelector.class);
 
     private Pairs pairs;
     private View view;
@@ -23,7 +23,7 @@ public class GameEngine {
     private final StatisticsComponent statisticsComponent;
     private final BoardComponent boardComponent;
 
-    public GameEngine(final TerminalUI terminalUI) {
+    public GameViewSelector(final TerminalUI terminalUI) {
         this.terminalUI = terminalUI;
 
         aboutComponent = new AboutComponent();
@@ -31,7 +31,7 @@ public class GameEngine {
         boardComponent = new BoardComponent(Pairs.FOUR);
     }
 
-    public GameEngine configure(String gameSignal) {
+    public GameViewSelector configure(String gameSignal) {
         view = switch (GameSignal.valueOf(gameSignal)) {
             case ABOUT -> aboutComponent.configure(terminalUI).build();
             case STATISTICS -> statisticsComponent.configure(terminalUI).build();
